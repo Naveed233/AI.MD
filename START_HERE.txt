@@ -1,0 +1,49 @@
+🎯 PROJECT LOCATION
+====================
+
+📂 Path: /Users/naveedmaqbool/Desktop/Sen/md-system
+
+🗂️ WHAT YOU'LL SEE
+===================
+
+📄 README.md              ← Start here! Full documentation
+📄 DEPLOYMENT.md          ← How to deploy to GCP  
+📄 PROJECT_SUMMARY.md     ← Technical overview
+
+📦 FRONTEND (Next.js)
+   Location: frontend/
+   Main file: frontend/pages/predict.tsx
+   Access: http://localhost:3000 (when running)
+
+📦 BACKEND (Laravel)  
+   Location: backend/
+   Main file: backend/app/Http/Controllers/PredictionController.php
+   Access: http://localhost:8000 (when running)
+
+📦 ML SERVICE (FastAPI)
+   Location: ml_service/
+   Main file: ml_service/main.py
+   Access: http://localhost:8080 (when running)
+
+📦 CLOUD FUNCTIONS
+   Location: cloud_functions/
+   Auto-retraining trigger
+
+📦 INFRASTRUCTURE
+   Location: infra/
+   Setup script: infra/gcp_setup.sh
+
+🚀 QUICK START
+==============
+1. Read README.md for overview
+2. Install Docker Desktop  
+3. Run: make build && make up
+4. Open browser to http://localhost:3000
+
+📖 KEY FILES TO READ
+====================
+1. README.md → Complete system overview
+2. DEPLOYMENT.md → GCP deployment steps  
+3. PROJECT_SUMMARY.md → Technical details
+4. docker-compose.yml → Local dev setup
+5. cloudbuild.yaml → CI/CD pipeline

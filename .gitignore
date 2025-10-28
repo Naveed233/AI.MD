@@ -1,0 +1,60 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+.next/
+dist/
+build/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Laravel
+storage/*.key
+bootstrap/cache/*.php
+
+# ML Models
+*.pkl
+*.joblib
+*.h5
+*.onnx
+models/
+*.index
+
+# Docker volumes
+mysql_data/
+redis_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# GCP
+.gcloudignore
+service-account.json
+
+# Data
+data/
+artifacts/
+training/
+

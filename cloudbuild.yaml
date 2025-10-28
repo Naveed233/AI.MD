@@ -1,0 +1,147 @@
+steps:
+  # Set variables
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        export PROJECT_ID=$PROJECT_ID
+        export REGION=${_REGION}
+        export GCS_BUCKET=${_GCS_BUCKET}
+
+  # Build and push ML Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/ml-service:${SHORT_SHA}'
+      - '-t'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/ml-service:latest'
+      - './ml_service'
+    timeout: 1200s
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/ml-service:${SHORT_SHA}'
+    timeout: 1200s
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/ml-service:latest'
+    timeout: 1200s
+
+  # Deploy ML Service
+  - name: 'gcr.io/google-cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'deploy'
+      - 'ml-service'
+      - '--image'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/ml-service:${SHORT_SHA}'
+      - '--region'
+      - '${REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '2Gi'
+      - '--timeout'
+      - '540'
+      - '--set-env-vars'
+      - 'GCS_BUCKET=${_GCS_BUCKET},PROJECT_ID=${PROJECT_ID}'
+
+  # Build and push Backend
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/backend:${SHORT_SHA}'
+      - '-t'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/backend:latest'
+      - './backend'
+    timeout: 1200s
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/backend:${SHORT_SHA}'
+    timeout: 1200s
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/backend:latest'
+    timeout: 1200s
+
+  # Deploy Backend
+  - name: 'gcr.io/google-cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'deploy'
+      - 'backend'
+      - '--image'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/backend:${SHORT_SHA}'
+      - '--region'
+      - '${REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'ML_API_URL=https://ml-service-${PROJECT_ID}.${REGION}.run.app,DB_HOST=${_DB_HOST},DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},DB_DATABASE=${_DB_DATABASE}'
+
+  # Build and push Frontend
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/frontend:${SHORT_SHA}'
+      - '-t'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/frontend:latest'
+      - './frontend'
+    timeout: 1200s
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/frontend:${SHORT_SHA}'
+    timeout: 1200s
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/frontend:latest'
+    timeout: 1200s
+
+  # Deploy Frontend
+  - name: 'gcr.io/google-cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'deploy'
+      - 'frontend'
+      - '--image'
+      - '${REGION}-docker.pkg.dev/${PROJECT_ID}/md/frontend:${SHORT_SHA}'
+      - '--region'
+      - '${REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'NEXT_PUBLIC_API_URL=https://backend-${PROJECT_ID}.${REGION}.run.app'
+
+substitutions:
+  _REGION: asia-northeast1
+  _GCS_BUCKET: md-system-data
+  _DB_HOST: 127.0.0.1
+  _DB_USER: root
+  _DB_PASSWORD: ''
+  _DB_DATABASE: md_system
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_32'
+
