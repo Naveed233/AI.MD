@@ -12,13 +12,17 @@ export default function Home() {
           </div>
         </Link>
         
-        <div className="bg-green-500 text-white font-bold py-10 px-6 rounded text-center">
-          View Analytics
-        </div>
+        <Link href="/analytics">
+          <div className="bg-green-500 hover:bg-green-700 text-white font-bold py-10 px-6 rounded text-center cursor-pointer">
+            View Analytics
+          </div>
+        </Link>
         
-        <div className="bg-purple-500 text-white font-bold py-10 px-6 rounded text-center">
-          Manage Models
-        </div>
+        <Link href="/models">
+          <div className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-10 px-6 rounded text-center cursor-pointer">
+            Manage Models
+          </div>
+        </Link>
       </div>
 
       <div className="mt-8">

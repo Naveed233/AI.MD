@@ -1,4 +1,4 @@
-.PHONY: help setup build up down logs clean test deploy
+.PHONY: help setup build up down logs clean test deploy ci
 
 help:
 	@echo "AI Merchandising System - Available Commands:"
@@ -9,7 +9,8 @@ help:
 	@echo "  make logs     - View logs from all services"
 	@echo "  make clean    - Remove containers, volumes, and images"
 	@echo "  make test     - Run tests for all services"
-	@echo "  make deploy   - Deploy to GCP via Cloud Build"
+	@echo "  make deploy   - (disabled) GCP deploy placeholder"
+	@echo "  make ci       - CI-friendly build and tests (no cloud)"
 
 setup:
 	@echo "Setting up development environment..."
@@ -44,6 +45,12 @@ test:
 	cd backend && php artisan test
 
 deploy:
-	@echo "Deploying to GCP..."
-	gcloud builds submit --config cloudbuild.yaml
+	@echo "GCP deployment is disabled. No action taken."
+	@echo "Set up an alternative deploy (e.g., Render, Fly.io) or enable GCP later."
+
+ci:
+	@echo "Running CI steps (no cloud auth)..."
+	make setup
+	make test
+	make build
 

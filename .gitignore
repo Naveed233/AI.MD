@@ -71,3 +71,5 @@ PHP_FILES_SUMMARY.md
 STREAMLIT_DEPLOYMENT.md
 START_HERE.txt
 
+# Ignore explanation docs
+*.md
