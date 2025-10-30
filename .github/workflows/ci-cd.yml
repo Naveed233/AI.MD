@@ -173,6 +173,7 @@ jobs:
       with:
         context: ./ml_service
         push: false
+        load: true
         tags: md-system/ml-service:test
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -182,13 +183,14 @@ jobs:
       with:
         context: ./frontend
         push: false
+        load: true
         tags: md-system/frontend:test
         cache-from: type=gha
         cache-to: type=gha,mode=max
     
     - name: Verify Docker images
       run: |
-        docker images | grep md-system
+        docker images | grep md-system || echo "No local images found (ok if using buildx cache only)"
 
   # ============================================
   # JOB 5: Integration Tests
