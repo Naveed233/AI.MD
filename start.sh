@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env sh
+set -eu
 
 # Default PORT if not provided by Railway
 export PORT="${PORT:-8080}"
