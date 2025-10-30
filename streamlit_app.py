@@ -81,11 +81,13 @@ with st.sidebar:
     
     if st.button("🔍 Test Connection"):
         try:
-            response = requests.get(f"{ml_url}/health", timeout=5)
+            response = requests.get(f"{ml_url}/health", timeout=15)
             if response.status_code == 200:
                 st.success("✅ Connected to ML Service!")
             else:
                 st.error(f"❌ Connection failed: {response.status_code}")
+        except requests.exceptions.Timeout:
+            st.error("⏱️ Timed out connecting to ML Service (15s). Railway cold start? Try again.")
         except Exception as e:
             st.error(f"❌ Cannot connect: {str(e)}")
 
@@ -139,7 +141,7 @@ with tab1:
                     f"{st.session_state.ml_api_url}/predict",
                     json=payload,
                     headers={"Content-Type": "application/json"},
-                    timeout=10
+                    timeout=25
                 )
                 
                 if response.status_code == 200:
@@ -209,7 +211,7 @@ with tab1:
                 - Or update the URL in the sidebar above
                 """)
             except requests.exceptions.Timeout:
-                st.error("⏱️ Request timed out. The ML service may be slow or unreachable.")
+                st.error("⏱️ Request timed out (25s). The ML service may be slow or unreachable.")
             except Exception as e:
                 st.error(f"❌ Unexpected error: {str(e)}")
 
@@ -322,13 +324,15 @@ with tab3:
     st.subheader("🔍 Model Status")
     if st.button("Check Model Health"):
         try:
-            response = requests.get(f"{st.session_state.ml_api_url}/health", timeout=5)
+            response = requests.get(f"{st.session_state.ml_api_url}/health", timeout=15)
             if response.status_code == 200:
                 health = response.json()
                 st.success("✅ Model is healthy and loaded!")
                 st.json(health)
             else:
                 st.error("❌ Model health check failed")
+        except requests.exceptions.Timeout:
+            st.error("⏱️ Health check timed out (15s).")
         except Exception as e:
             st.error(f"❌ Cannot connect to ML service: {str(e)}")
 
