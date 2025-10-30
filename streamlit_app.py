@@ -41,9 +41,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialize session state and get ML API URL from environment or default
+import os
+ML_API_URL = os.getenv("ML_API_URL", "http://localhost:8080")
+
 if 'ml_api_url' not in st.session_state:
-    st.session_state.ml_api_url = "http://localhost:8080"
+    st.session_state.ml_api_url = ML_API_URL
 
 # Header
 st.markdown('<div class="main-header">🛍️ AI Merchandising System</div>', unsafe_allow_html=True)
@@ -68,6 +71,13 @@ with st.sidebar:
     **Model:** Random Forest Regressor
     **Accuracy:** 97% (R² = 0.97)
     """)
+    
+    # Show environment info
+    with st.expander("🔧 Environment Info"):
+        st.code(f"""
+        ML API URL: {st.session_state.ml_api_url}
+        Environment: {os.getenv('STREAMLIT_ENV', 'local')}
+        """)
     
     if st.button("🔍 Test Connection"):
         try:
@@ -190,10 +200,18 @@ with tab1:
                     st.text(response.text)
                     
             except requests.exceptions.ConnectionError:
-                st.error("❌ Cannot connect to ML service. Make sure it's running on " + st.session_state.ml_api_url)
-                st.info("💡 For local development, start the ML service: `docker compose up ml_service`")
+                st.error("❌ Cannot connect to ML service.")
+                st.warning(f"**ML Service URL:** {st.session_state.ml_api_url}")
+                st.info("""
+                💡 **To fix this:**
+                - For local: Start ML service with `docker compose up ml_service`
+                - For Streamlit Cloud: Set `ML_API_URL` in Streamlit Secrets
+                - Or update the URL in the sidebar above
+                """)
+            except requests.exceptions.Timeout:
+                st.error("⏱️ Request timed out. The ML service may be slow or unreachable.")
             except Exception as e:
-                st.error(f"❌ Error: {str(e)}")
+                st.error(f"❌ Unexpected error: {str(e)}")
 
 with tab2:
     st.header("Analytics Dashboard")
