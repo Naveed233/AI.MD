@@ -12,18 +12,13 @@ import numpy as np
 import os
 import logging
 from typing import List, Optional
-from google.cloud import storage, logging as cloud_logging
+ 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize GCP logging
-try:
-    client = cloud_logging.Client()
-    client.setup_logging()
-except Exception as e:
-    logger.warning(f"Could not setup GCP logging: {e}")
+# No external cloud logging; using standard logging only
 
 app = FastAPI(title="MD ML Service", version="1.0.0")
 
@@ -38,12 +33,10 @@ app.add_middleware(
 
 # Configuration
 MODEL_PATH = "/app/models/model.pkl"
-GCS_BUCKET = os.getenv("GCS_BUCKET", "md-system-data")
-PROJECT_ID = os.getenv("PROJECT_ID")
 
 # Global model variable
 model = None
-storage_client = None
+ 
 
 # Request/Response models
 class PredictionRequest(BaseModel):
@@ -65,32 +58,7 @@ class ReloadResponse(BaseModel):
     status: str
     message: str
 
-def load_model_from_gcs():
-    """Load model from Google Cloud Storage"""
-    global model, storage_client
-    
-    try:
-        if not storage_client:
-            storage_client = storage.Client(project=PROJECT_ID)
-        
-        bucket = storage_client.bucket(GCS_BUCKET)
-        blob = bucket.blob("models/model.pkl")
-        
-        # Create models directory if it doesn't exist
-        os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-        
-        blob.download_to_filename(MODEL_PATH)
-        model = joblib.load(MODEL_PATH)
-        logger.info("Model loaded successfully from GCS")
-        return model
-    except Exception as e:
-        logger.error(f"Failed to load model from GCS: {e}")
-        # Try loading local model as fallback
-        if os.path.exists(MODEL_PATH):
-            model = joblib.load(MODEL_PATH)
-            logger.info("Loaded model from local filesystem")
-            return model
-        raise
+ 
 
 def load_model_local():
     """Load model from local filesystem"""
@@ -114,10 +82,7 @@ async def startup_event():
     """Initialize model on startup"""
     global model
     try:
-        if GCS_BUCKET and os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-            model = load_model_from_gcs()
-        else:
-            model = load_model_local()
+        model = load_model_local()
     except Exception as e:
         logger.error(f"Startup error: {e}")
         model = load_model_local()
@@ -127,8 +92,7 @@ async def health_check():
     """Health check endpoint for Cloud Run"""
     return {
         "status": "healthy",
-        "model_loaded": model is not None,
-        "bucket": GCS_BUCKET
+        "model_loaded": model is not None
     }
 
 @app.post("/predict", response_model=PredictionResponse)
@@ -136,7 +100,6 @@ async def predict(request: PredictionRequest):
     """
     Predict merchandising demand based on customer features
     """
-    global model
     
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
@@ -178,23 +141,16 @@ async def predict(request: PredictionRequest):
 @app.post("/reload", response_model=ReloadResponse)
 async def reload_model():
     """
-    Reload the latest model from GCS
+    Reload the latest model from local filesystem
     """
     global model
     
     try:
-        if GCS_BUCKET and os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-            model = load_model_from_gcs()
-            return ReloadResponse(
-                status="success",
-                message="Model reloaded from GCS"
-            )
-        else:
-            model = load_model_local()
-            return ReloadResponse(
-                status="success",
-                message="Model reloaded from local filesystem"
-            )
+        model = load_model_local()
+        return ReloadResponse(
+            status="success",
+            message="Model reloaded from local filesystem"
+        )
     except Exception as e:
         logger.error(f"Reload error: {e}")
         return ReloadResponse(
