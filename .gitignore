@@ -58,3 +58,16 @@ data/
 artifacts/
 training/
 
+# Explanation documentation (keep README.md only)
+不知道为什么.md
+HOW_IT_CALCULATES.md
+DATASETS_GUIDE.md
+DEPLOYMENT.md
+PROJECT_SUMMARY.md
+HOW_TO_RUN.md
+LARAVEL_ROLE.md
+ML_MODELS_USED.md
+PHP_FILES_SUMMARY.md
+STREAMLIT_DEPLOYMENT.md
+START_HERE.txt
+
