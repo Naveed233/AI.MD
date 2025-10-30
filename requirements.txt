@@ -1,0 +1,2 @@
+# Include service dependencies for Railway Python detection
+-r md-system/ml_service/requirements.txt
