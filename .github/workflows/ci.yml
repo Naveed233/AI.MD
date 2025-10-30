@@ -22,7 +22,6 @@ jobs:
       run: |
         cd ml_service
         pip install -r requirements.txt
-        pip install pytest
     
     - name: Run ML Service tests
       run: |
